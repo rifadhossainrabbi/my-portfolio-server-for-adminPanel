@@ -1,24 +1,16 @@
 const express = require('express');
 const cors = require('cors');
-const app = express();
-const port = 5000;
-
 require('dotenv').config();
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+
+const app = express();
+const port = process.env.PORT || 5000;
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
-
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
-
-
-
-
 const uri = process.env.MONGODB_URI;
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -29,40 +21,52 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // Connect to MongoDB
+    // await client.connect(); // Production এ এটি প্রয়োজন হতে পারে
 
     const database = client.db('portfolio_db');
-    const porjectsCollection = database.collection('projects');
+    const projectsCollection = database.collection('projects');
 
-    // ১. সব প্রজেক্ট নিয়ে আসার রুট
+    // ১. সব প্রজেক্ট ডাটাবেস থেকে নিয়ে আসা
     app.get('/projects', async (req, res) => {
-      const result = await porjectsCollection.find().toArray();
-      res.send(result);
+      try {
+        const result = await projectsCollection.find().toArray();
+        res.status(200).send(result);
+      } catch (error) {
+        res.status(500).send({ message: 'Error fetching projects', error });
+      }
     });
 
-    // আপনার আগের পোস্ট রুট
+    // ২. নতুন প্রজেক্ট অ্যাড করা
     app.post('/projects', async (req, res) => {
-      const projects = req.body;
-      const result = await porjectsCollection.insertOne(projects);
+      try {
+        const project = req.body;
+        const result = await projectsCollection.insertOne(project);
+        res.status(201).send(result);
+      } catch (error) {
+        res.status(500).send({ message: 'Error saving project', error });
+      }
+    });
+
+    // ৩. প্রজেক্ট ডিলিট করা (অপশনাল - আইকনের জন্য যোগ করা হয়েছে)
+    app.delete('/projects/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await projectsCollection.deleteOne(query);
       res.send(result);
     });
 
-    // Send a ping to confirm a successful connection
-    await client.db('admin').command({ ping: 1 });
-    console.log(
-      'Pinged your deployment. You successfully connected to MongoDB!',
-    );
-  } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
+    console.log('Connected to MongoDB successfully!');
+  } catch (error) {
+    console.error('MongoDB Connection Error:', error);
   }
 }
 run().catch(console.dir);
 
-
-
+app.get('/', (req, res) => {
+  res.send('Portfolio Server is Running...');
+});
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.log(`Server is listening on port ${port}`);
 });
