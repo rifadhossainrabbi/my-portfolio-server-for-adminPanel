@@ -48,6 +48,24 @@ async function run() {
       }
     });
 
+    app.patch('/projects/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          title: req.body.title,
+          techStack: req.body.techStack,
+          githubUrl: req.body.githubUrl,
+          liveLink: req.body.liveLink,
+          description: req.body.description,
+          isPublic: req.body.isPublic,
+          imageUrl: req.body.imageUrl,
+        },
+      };
+      const result = await projectsCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
     // ৩. প্রজেক্ট ডিলিট করা (অপশনাল - আইকনের জন্য যোগ করা হয়েছে)
     app.delete('/projects/:id', async (req, res) => {
       const id = req.params.id;
