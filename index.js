@@ -41,7 +41,7 @@ async function run() {
       res.send(result);
     });
 
-    // আপনার আগের পোস্ট রুট
+    //project post or add
     app.post('/projects', async (req, res) => {
       const projects = req.body;
       const result = await porjectsCollection.insertOne(projects);
