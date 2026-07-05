@@ -66,7 +66,7 @@ async function run() {
       res.send(result);
     });
 
-    // ৩. প্রজেক্ট ডিলিট করা (অপশনাল - আইকনের জন্য যোগ করা হয়েছে)
+    // delete route
     app.delete('/projects/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
