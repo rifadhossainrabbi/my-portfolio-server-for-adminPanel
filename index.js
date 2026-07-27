@@ -7,14 +7,11 @@ require('dotenv').config();
 app.use(cors());
 app.use(express.json());
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
-
-
-
 
 const uri = process.env.MONGODB_URI;
 
@@ -48,6 +45,13 @@ async function run() {
       res.send(result);
     });
 
+    app.delete('/projects/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }; // আইডি দিয়ে ফিল্টার তৈরি
+      const result = await porjectsCollection.deleteOne(query);
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
     console.log(
@@ -59,9 +63,6 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
-
-
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
