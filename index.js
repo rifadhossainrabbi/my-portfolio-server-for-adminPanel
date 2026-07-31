@@ -57,6 +57,8 @@ async function run() {
             githubUrl: req.body.githubUrl,
             liveLink: req.body.liveLink,
             description: req.body.description,
+            challenges: req.body.challenges,
+            futurePlans: req.body.futurePlans,
             imageUrl: req.body.imageUrl,
             isPublic: req.body.isPublic,
           },
